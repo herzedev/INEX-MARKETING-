@@ -1,5 +1,5 @@
 
-name: Build UNEX Marketplace
+name: Build UNEX Marketplace APK
 
 on:
   push:
@@ -11,10 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout project
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Extract project
         run: |
           mkdir app
           unzip -q unex-marketplace.zip -d app
@@ -25,17 +36,33 @@ jobs:
           fi
           echo "PROJECT_DIR=$(dirname "$PACKAGE_JSON")" >> "$GITHUB_ENV"
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v2
-
       - name: Install dependencies
-        run: cd "$PROJECT_DIR" && bun install --frozen-lockfile
+        run: cd "$PROJECT_DIR" && npm install
 
-      - name: Build project
-        run: cd "$PROJECT_DIR" && bun run build
+      - name: Build web app
+        run: cd "$PROJECT_DIR" && npm run build
 
-      - name: Upload build
+      - name: Install Capacitor
+        run: |
+          cd "$PROJECT_DIR"
+          npm install @capacitor/core @capacitor/android
+          npm install -D @capacitor/cli
+
+      - name: Configure Android
+        run: |
+          cd "$PROJECT_DIR"
+          npx cap init "UNEX Marketplace" "com.herzedev.unexmarketplace" --web-dir dist
+          npx cap add android
+          npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd "$PROJECT_DIR/android"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: unex-marketplace-build
-          path: ${{ env.PROJECT_DIR }}/dist/
+          name: UNEX-Marketplace-APK
+          path: ${{ env.PROJECT_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
