@@ -3,8 +3,7 @@ name: Build UNEX Marketplace
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -15,17 +14,28 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
 
+      - name: Extract project ZIP
+        run: |
+          mkdir app
+          unzip -q unex-marketplace.zip -d app
+          PACKAGE_JSON=$(find app -name package.json -print -quit)
+          if [ -z "$PACKAGE_JSON" ]; then
+            echo "package.json not found"
+            exit 1
+          fi
+          echo "PROJECT_DIR=$(dirname "$PACKAGE_JSON")" >> "$GITHUB_ENV"
+
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: cd "$PROJECT_DIR" && bun install --frozen-lockfile
 
       - name: Build project
-        run: bun run build
+        run: cd "$PROJECT_DIR" && bun run build
 
-      - name: Upload website
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: unex-marketplace-build
-          path: dist/
+          path: ${{ env.PROJECT_DIR }}/dist/
