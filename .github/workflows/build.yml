@@ -36,8 +36,13 @@ jobs:
           fi
           echo "PROJECT_DIR=$(dirname "$PACKAGE_JSON")" >> "$GITHUB_ENV"
 
+    
       - name: Install dependencies
-        run: cd "$PROJECT_DIR" && npm install
+        run: |
+          cd "$PROJECT_DIR"
+          npm pkg set 'devDependencies.esbuild=^0.28.2'
+          npm install
+          
 
       - name: Build web app
         run: cd "$PROJECT_DIR" && npm run build
