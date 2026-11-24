@@ -1,1 +1,31 @@
 
+name: Build UNEX Marketplace
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build project
+        run: bun run build
+
+      - name: Upload website
+        uses: actions/upload-artifact@v4
+        with:
+          name: unex-marketplace-build
+          path: dist/
