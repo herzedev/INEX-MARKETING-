@@ -1,2 +1,2 @@
 # INEX-MARKETING-
-UNEX Marketplace Android App
+INEX Marketplace Android App
