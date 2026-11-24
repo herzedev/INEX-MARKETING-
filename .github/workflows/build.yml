@@ -56,7 +56,7 @@ jobs:
       - name: Configure Android
         run: |
           cd "$PROJECT_DIR"
-          npx cap init "UNEX Marketplace" "com.herzedev.unexmarketplace" --web-dir dist
+          npx cap init "YNEX" "com.herzedev.ynex" --web-dir dist
           npx cap add android
           npx cap sync android
 
@@ -69,5 +69,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: UNEX-Marketplace-APK
+          name: YNEX
           path: ${{ env.PROJECT_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
